@@ -1,0 +1,32 @@
+{
+  "name": "conter",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js",
+    "client": "cd client && npm start",
+    "server": "nodemon --inspect ./server.js 9229 ",
+    "dev": "concurrently  --kill-others-on-fail \" npm run server\" \"npm run client\""
+  },
+  "optionalDependencies": {
+    "fsevents": "2.1.2"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "body-parser": "^1.18.3",
+    "cookie": "^0.4.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.12",
+    "node-fetch": "^2.6.0",
+    "operadriver": "^1.0.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5",
+    "selenium-webdriver": "^4.0.0-beta.2",
+    "set-interval-async": "1.0.34",
+    "xlsx": "^0.16.0"
+  },
+  "devDependencies": {
+    "concurrently": "^5.2.0",
+    "nodemon": "^2.0.2"
+  }
+}

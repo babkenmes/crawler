@@ -1,0 +1,26 @@
+db.getCollection('keywords').find({region_tag:"vpn_org1_crawler","durations.0.landed":"False","device_group" : ObjectId("5f4fbb2e8f3edd00134d2ec2"),}).count()
+
+db.getCollection('keywords').aggregate(
+  [
+    {
+       $match: { region_tag:"vpn_org1_crawler","durations.0.landed":"False","device_group" : ObjectId("5f4fbb2e8f3edd00134d2ec2"), errorMessage:{$exists:true} }
+    },
+    {
+      $group :
+        {
+          _id : "$errorMessage",
+           count: { $sum: 1 }
+        }
+     },
+     {
+        $sort : { count: -1 }
+     }
+   ]
+ )
+
+
+
+
+
+
+

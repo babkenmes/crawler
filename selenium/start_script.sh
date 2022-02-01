@@ -1,0 +1,1 @@
+python3.8 /etc/node_scripts/node_main_script.py

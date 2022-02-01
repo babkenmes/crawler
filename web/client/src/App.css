@@ -1,0 +1,93 @@
+body {
+  background-color: #f5f5f5 !important;
+}
+
+.image img{
+    width: 100%;
+    height: 100%;
+}
+
+.round-image img{
+  border-radius: 50%;;
+}
+
+.view-image {
+  width: 200px;
+  height: 200px;
+}
+
+.price {
+  position: relative;
+  top: 20px;
+}
+
+.container {
+  width: 90%;
+}
+
+.form {
+  background-color: #fff;
+  margin-top: 5%;
+  border-radius: 7px;
+  display: flex;
+  justify-content: center;
+}
+
+.save-button {
+  padding: 15px 0;
+  width: auto;
+  margin: auto;
+}
+
+.MuiInputLabel-outlined.MuiInputLabel-shrink {
+  transform: translate(14px, -10px) scale(1) !important;
+}
+
+.MuiFormControl-root { 
+  width: 100%;
+}
+
+.userItem_data {
+  list-style: none;
+  border: 1px solid;
+  padding: 15px;
+}
+
+.userItem {
+  display: flex;
+}
+.userItem_data_padding {
+  padding: 3px;
+}
+
+.MuiDrawer-root .Mui-selected .MuiListItemIcon-root {
+  color: rgb(63 81 181);
+}
+
+.MuiDrawer-root .MuiButtonBase-root,
+.MuiDrawer-root .MuiListItemIcon-root{
+  color:#949494;
+}
+
+.MuiDrawer-root .Mui-selected.MuiButtonBase-root{
+  color:#232323
+}
+.MuiListItem-root.Mui-selected, .MuiListItem-root.Mui-selected:hover{
+  background-color: rgb(63 81 181 / 5%)
+}
+
+.region-state-wrapper {
+  min-width: 95px;
+  margin-left:5px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+<<<<<<< HEAD
+span.region-state-value {float: right;color: #a2a2a2;}
+=======
+span.region-state-value {float: right;color: #a2a2a2;}
+
+span.region-state-wrapper {
+  font-size: 18px;
+}
+>>>>>>> fe6ce9c5a653e331c9f3912ef5eabc35fdeeea6a

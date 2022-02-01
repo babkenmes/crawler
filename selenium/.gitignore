@@ -1,0 +1,10 @@
+node_modules
+.env
+docker-compose.yml
+__pycache__
+*_conf_*
+conf
+data
+db
+.env
+node_scripts/node_modules

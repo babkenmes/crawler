@@ -1,0 +1,10 @@
+selenium/docker-compose.yml
+selenium/__pycache__/
+selenium/*_conf_*
+selenium/conf/
+selenium/data/
+selenium/db/
+selenium/.env
+selenium/node_scripts/node_modules
+__pycache__/
+selenium/docker-configs.yml

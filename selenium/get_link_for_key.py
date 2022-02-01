@@ -1,0 +1,303 @@
+# -*- coding: utf-8 -*-
+from webmen import getAllDevices, getDevice, getWeb, getKey, keyDone, keyError, keyStarted, keyStopped, recapDetected, saveLink
+from exceptions import *
+from fields import *
+from anmen import callAnimation, getAnimationGroupName
+from multiprocessing import Pool
+from contextlib import closing
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoAlertPresentException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+
+from random import gauss
+import unittest
+import time
+import re
+import sys
+import time
+import yaml
+import requests
+import random
+
+# APPLICATION = "vpn"
+
+
+MORE_RESULTS_TEXT = "More results"
+MAX_PAGES = 20
+PORT = "4444"
+
+WEB = getWeb(r'./keys.json')
+
+# ="None" Shit, I am tired
+
+
+
+def getOptions(userAgent, windowSize, application_name="None"):
+    options = Options()
+    width = int(windowSize.split(',')[0])
+    height = int(windowSize.split(',')[1])
+    mobile_emulation = { "deviceMetrics": { "width": width, "height": height, "pixelRatio": 3 }}
+    
+    # options.add_experimental_option("mobileEmulation", mobile_emulation)
+    options.accept_untrusted_certs = True
+    options.headless = True
+    options.assume_untrusted_cert_issuer = True
+    # options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_argument(f"--user-agent={userAgent}")
+    options.add_argument(f"--window-size={windowSize}")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--disable-session-crashed-bubble")
+    options.add_argument("--enable-javascript")
+    options.add_argument("--cache-control=max-age=0")
+    # options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument("--disable-blink-features")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument('--no-sandbox')   
+    options.add_argument('--disable-dev-shm-usage') 
+    options.add_argument("--start-maximized")
+
+
+    # if application_name != "None":
+    #     options.set_capability("applicationName", application_name)
+
+    options.set_capability("applicationName", application_name)
+
+    return options
+
+
+def findInSearch(driver, key_data, is_mobile):
+    tld = key_data["tld"]
+    domain = key_data["domain"]
+    search(driver, key_data[KEY_FIELD], tld)
+
+    page = 0
+    while page <= MAX_PAGES:
+        page += 1
+        elements = driver.find_elements_by_xpath(
+            "//a[contains(@href,'" + domain + "')]")
+        # try:
+        #     elements = driver.find_elements_by_xpath(
+        #         "//a[contains(@href,'blablabil')]")
+        #     # print(elements)
+        # except Exception as inst :
+        #     print("Element not found" +
+        #               key_data[KEY_FIELD], f" type:{type(inst)}, message: {inst}, args:{inst.args}")
+        #     nextPage(driver, is_mobile)
+        #     # print("Could not locate site element")
+        if len(elements) > 0:
+            # print(f"Found in page: {page}")
+            # go to web site
+            return elements[0]
+        else:
+            print(f"Page domain - {domain} - not found")
+            nextPage(driver, is_mobile)
+
+    raise WebNotFound
+
+
+def enterKeyword(element, keyword):
+    element.clear()
+    for letter in keyword:
+        try:
+            time.sleep(abs((gauss(1, 1) * 15 + 150))/1000)
+        except:
+            pass
+        element.send_keys(letter)
+
+
+def tryClosingPrivacyAgreement(driver):
+    try:
+        driver.switch_to.frame(0)
+        agreebutton = driver.find_element_by_id('introAgreeButton')
+        agreebutton.click()
+        # print("Clicked privacy agreement")
+        time.sleep(abs((gauss(1, 1) * 2000 + 1000))/1000)
+    except Exception as e:
+        try:
+            driver.switch_to.default_content()
+            agreebutton = driver.find_element_by_id('cnskx')
+            agreebutton.click()
+        except:
+            pass
+    finally:
+        driver.switch_to.default_content()
+
+def goDirect(driver, keyword):
+    time.sleep(abs((gauss(1, 1) * 550 + 3500))/1000)
+    driver.get(keyword)
+    time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+
+def search(driver, keyword, tld):
+    time.sleep(abs((gauss(1, 1) * 550 + 3500))/1000)
+    driver.get("https://google." + tld + "/")
+    time.sleep(abs((gauss(1, 1) * 500 + 10000))/1000)
+    print("bla")
+    tryClosingPrivacyAgreement(driver)
+    time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+    search_input = driver.find_element_by_name("q")
+    enterKeyword(search_input, keyword)
+    time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+    search_input.send_keys(Keys.ENTER)
+    time.sleep(abs((gauss(1, 1) * 500 + 2000))/1000)
+
+    time.sleep(abs((gauss(1, 1) * 500 + 1000))/1000)
+    driver.execute_script("window.scrollTo(0, 2000)")
+    time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+    driver.execute_script("window.scrollTo(0, 10)")
+    time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+    # tryClosingPrivacyAgreement(driver)
+
+def nextPage(driver, mobile):
+    # print("trying next page")
+    if mobile == True:
+        nextButton = driver.find_element_by_class_name("RVQdVd")
+    else:
+        nextButton = driver.find_element_by_id('pnnext')
+    # if len(nextButton) == 0:
+        # raise NextButtonNotFound
+    try:
+        try:
+            time.sleep(abs((gauss(1, 1) * 500 + 1000))/1000)
+            ActionChains(driver).move_to_element(nextButton).perform()
+        except Exception as e:
+            pass
+            # print(e)
+        finally : 
+            nextButton.click()
+    except Exception as e:
+        raise NextButtonCouldNotBeClicked(e)
+
+
+def getRemoteWebDriver(options):
+    driver = webdriver.Remote(
+        command_executor=f'http://localhost:{PORT}/wd/hub',
+        options=options)
+    driver.implicitly_wait(30)
+    return driver
+
+
+def goToWeb(driver, website):
+    try:
+        actions = ActionChains(driver)
+        time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+        actions.move_to_element(website).perform()
+        time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+        website.click()
+        time.sleep(abs((gauss(1, 1) * 500 + 3000))/1000)
+    except Exception as e:
+        raise WebNotClickable(e)
+        # print("Could not click " + key_data[KEY_FIELD], f" type:{type(inst)}, message: {inst}, args:{inst.args}")
+
+
+def runDevice(application):
+    # print(key_data[DEVICE_GROUP_FIELD])
+    # keyStarted(key_data["_id"])
+    # rand_seconds = random.randint(10,200)
+    # time.sleep(rand_seconds)
+    time.sleep(abs((gauss(1, 1) * 5000 + 1000))/1000)
+    while True:
+        try:
+            try:
+                landed = False
+                key_data = getKey(application)
+                if not key_data:
+                    print("no keyword")
+                    time.sleep(60 + abs((gauss(1, 1) * 5000 + 1000))/1000)
+                    continue
+                # print(key_data)
+                device = getDevice(key_data[DEVICE_GROUP_FIELD])
+                keyStarted(key_data["_id"], device[DEVICE_NAME_FIELD])
+                options = getOptions(device[USER_AGENT_FIELD],
+                                    device[WINDOW_SIZE_FIELD], key_data["region_tag"])
+                driver = getRemoteWebDriver(options)
+                link = key_data.get('link')
+                crawl = key_data.get('crawl')
+                if link and not crawl: 
+                    print("aaa")
+                    goDirect(driver, key_data["link"])
+                    landed = True
+                    callAnimation(key_data, driver)
+                else :
+
+                    ourWebSite = findInSearch(driver, key_data, device[MOBILE_FIELD])
+                    if ourWebSite is None:
+                        keyError(key_data["_id"],
+                            f"Keyword not found", landed)
+                        print("Not found")
+                    else:
+                        link = ourWebSite.get_attribute("ping")
+                        print("link")
+                        print(link)
+                        saveLink(key_data["_id"], ("https://google.com" + link))
+                        # goToWeb(driver, ourWebSite)
+                        landed = True
+                        # print("animating")
+                        # callAnimation(key_data, driver)
+                        # print("Site animation exception has accured" +
+                        #           key_data[KEY_FIELD], f" type:{type(inst)}, message: {inst}, args:{inst.args}")
+
+                        # print("successfully finished")
+                keyDone(key_data["_id"])
+            except WebNotClickable as e:
+                keyError(
+                    key_data["_id"], f"website is not clickable web:{WEB[DOMAIN_FIELD]}, exception: {e}", landed)
+            except AnimationError as e:
+                keyError(key_data["_id"],
+                        f"Animation exception has accured, exception: {e}", landed)
+            except NoDeviceError as e:
+                keyError(
+                    key_data["_id"], f"No device was found group:{key_data[DEVICE_GROUP_FIELD]}", landed)
+            except WebNotFound as e:
+                keyError(
+                    key_data["_id"], f"Web could not be found in {MAX_PAGES} pages, web: {WEB[DOMAIN_FIELD]}", landed)
+            except NextButtonNotFound as e:
+                keyError(
+                    key_data["_id"], f"Button for next page not be found, device:{device[DEVICE_NAME_FIELD]}, isMobile:{device[MOBILE_FIELD]}, button text: {MORE_RESULTS_TEXT}", landed)
+            except NextButtonCouldNotBeClicked as e:
+                keyError(
+                    key_data["_id"], f"Next page button could not be clicked, device:{device[DEVICE_NAME_FIELD]}, isMobile:{device[MOBILE_FIELD]}, button text: {MORE_RESULTS_TEXT}", landed)
+            except Exception as e:
+                keyError(key_data["_id"],
+                        f"An unknown has accured: {e} ", landed)
+                print(e)
+            finally:
+                if driver:
+                    driver.quit()
+                keyStopped(key_data["_id"])
+        except Exception as e:
+                # print(f"An unknown has accured: {e} ")
+                pass
+
+
+def getConnections(docker_config_file):
+    with open(docker_config_file) as file:
+        compose_configs = yaml.load(file, Loader=yaml.FullLoader)
+    connections=[]
+    for conect in compose_configs["conects"]: 
+        region_tag = conect['region_tag']
+        ordinary = (conect['ordinary'] * compose_configs['NODE_MAX_SESSION']) * [region_tag ]
+        crawlers = (conect['crawlers'] * compose_configs['NODE_MAX_SESSION']) * [f"{region_tag}_crawler" ]
+        connections = [*connections, *ordinary, *crawlers]
+    return connections
+
+if __name__ == '__main__':
+    connections = getConnections(r'./docker-configs.yml')
+    print(f"agents:{len(connections)}")
+    print(connections)
+    with closing(Pool(processes=len(connections))) as pool:
+        pool.map(runDevice, connections, 1)
+        pool.terminate()
+
+    # print('finished')

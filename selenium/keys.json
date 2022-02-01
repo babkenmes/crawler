@@ -1,0 +1,14 @@
+{
+    "animation-groups": [
+        "simple",
+        "anotherone"
+    ],
+    "user-agent-groups": [
+        "all-mobile",
+        "all-desktop"
+    ],
+    "web": {
+        "domain": "vapejuicedepot.com",
+        "tld": "com"
+    }
+}
